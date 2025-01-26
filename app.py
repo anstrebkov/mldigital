@@ -1,8 +1,7 @@
 import io
 import pickle
 import numpy as np
-import PIL.Image
-import PIL.ImageOps
+from PIL import Image, ImageOps
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -40,9 +39,9 @@ async def predict_image(file: UploadFile = File(...)):
         contents = await file.read()
         
         # Преобразование изображения
-        pil_image = PIL.Image.open(io.BytesIO(contents)).convert('L')  # Конвертация в grayscale
-        pil_image = PIL.ImageOps.invert(pil_image)  # Инверсия цветов
-        pil_image = pil_image.resize((28, 28), PIL.Image.ANTIALIAS)  # Изменение размера
+        pil_image = Image.open(io.BytesIO(contents)).convert('L')  # Конвертация в grayscale
+        pil_image = ImageOps.invert(pil_image)  # Инверсия цветов
+        pil_image = pil_image.resize((28, 28), Image.Resampling.LANCZOS)  # Изменение размера
         img_array = np.array(pil_image).reshape(1, -1)  # Преобразование в массив
         
         # Предсказание
