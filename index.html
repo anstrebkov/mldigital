@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Digit Classifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        #preview {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <h1>MNIST Digit Classifier</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="preview">
+        <img id="previewImage" src="#" alt="Image preview" style="display:none; max-width: 200px;">
+    </div>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('previewImage');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    predictImage(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function predictImage(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://localhost:8000/predict-image/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                document.getElementById('result').innerText = `Predicted Digit: ${result.prediction}`;
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('result').innerText = "Error processing image. Please try again.";
+            }
+        }
+    </script>
+</body>
+</html>
